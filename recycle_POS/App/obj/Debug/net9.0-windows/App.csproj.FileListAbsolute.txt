@@ -1,0 +1,14 @@
+C:\Users\user\Desktop\recycle_POS\App\bin\Debug\net9.0-windows\App.exe
+C:\Users\user\Desktop\recycle_POS\App\bin\Debug\net9.0-windows\App.deps.json
+C:\Users\user\Desktop\recycle_POS\App\bin\Debug\net9.0-windows\App.runtimeconfig.json
+C:\Users\user\Desktop\recycle_POS\App\bin\Debug\net9.0-windows\App.dll
+C:\Users\user\Desktop\recycle_POS\App\bin\Debug\net9.0-windows\App.pdb
+C:\Users\user\Desktop\recycle_POS\App\obj\Debug\net9.0-windows\App.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\user\Desktop\recycle_POS\App\obj\Debug\net9.0-windows\App.AssemblyInfoInputs.cache
+C:\Users\user\Desktop\recycle_POS\App\obj\Debug\net9.0-windows\App.AssemblyInfo.cs
+C:\Users\user\Desktop\recycle_POS\App\obj\Debug\net9.0-windows\App.csproj.CoreCompileInputs.cache
+C:\Users\user\Desktop\recycle_POS\App\obj\Debug\net9.0-windows\App.dll
+C:\Users\user\Desktop\recycle_POS\App\obj\Debug\net9.0-windows\refint\App.dll
+C:\Users\user\Desktop\recycle_POS\App\obj\Debug\net9.0-windows\App.pdb
+C:\Users\user\Desktop\recycle_POS\App\obj\Debug\net9.0-windows\App.genruntimeconfig.cache
+C:\Users\user\Desktop\recycle_POS\App\obj\Debug\net9.0-windows\ref\App.dll

@@ -1,0 +1,33 @@
+using System;
+using System.Windows.Forms;
+
+namespace MyFirstApp
+{
+    public class MainForm : Form
+    {
+        public MainForm()
+        {
+            this.Text = "我的第一個應用程式";
+            this.Width = 800;
+            this.Height = 600;
+
+            Button button = new Button();
+            button.Text = "點擊我";
+            button.Click += new EventHandler(Button_Click);
+            this.Controls.Add(button);
+        }
+
+        private void Button_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("按鈕被點擊了！");
+        }
+
+        [STAThread]
+        static void Main()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new MainForm());
+        }
+    }
+}
