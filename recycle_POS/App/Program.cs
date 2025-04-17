@@ -20,11 +20,19 @@ namespace MyFirstApp
             Button setting = new Button();
             setting.Text = "物品、價格設定";
             setting.Location = new System.Drawing.Point(50, 50);
-            setting.Size = new System.Drawing.Size(300, 100);
+            setting.Size = new System.Drawing.Size(300, 70);
             setting.Font = new System.Drawing.Font(setting.Font.FontFamily, 20);
             setting.Click += new EventHandler(NameSetting_Click);
             this.Controls.Add(setting);
 
+            //--------有設定按鈕-----------
+            Button reset = new Button();
+            reset.Text = "TEST";
+            reset.Location = new System.Drawing.Point(350, 50);
+            reset.Size = new System.Drawing.Size(300, 70);
+            reset.Font = new System.Drawing.Font(reset.Font.FontFamily, 20);
+            reset.Click += new EventHandler(Reset_Click);
+            this.Controls.Add(reset);
             // 顯示當前 name.txt 的資訊
             DisplayCurrentNames();
 
@@ -36,6 +44,12 @@ namespace MyFirstApp
             CustomDialog dialog = new CustomDialog(this);
             dialog.ShowDialog();
         }
+
+        private void Reset_Click(object? sender, EventArgs e)
+        {
+            DisplayCurrentNames();
+        }
+
 
         public void DisplayCurrentNames()
         {
@@ -49,10 +63,15 @@ namespace MyFirstApp
             {
                 this.Controls.Remove(control);
             }
+            // 清除總價 Label
+            foreach (var control in this.Controls.OfType<Label>().Where(c => c.Name == "totalPriceLabel").ToList())
+            {
+                this.Controls.Remove(control);
+            }
             if (File.Exists("name.txt"))
             {
                 string[] names = File.ReadAllLines("name.txt");
-                int yOffset = 200; // 設置初始的 Y 軸偏移量
+                int yOffset = 150; // 設置初始的 Y 軸偏移量
                 foreach (string line in names)
                 {
                     string[] parts = line.Split(','); // 以逗號分隔名稱和價格
@@ -60,14 +79,14 @@ namespace MyFirstApp
                     {
                         // 顯示商品名稱
                         Label nameLabel = new Label();
-                        nameLabel.Text = $"商品: {parts[0]}"; // 顯示商品名稱
+                        nameLabel.Text = $"物品: {parts[0]}"; // 顯示商品名稱
                         nameLabel.AutoSize = true; // 自動調整大小
                         nameLabel.Location = new System.Drawing.Point(50, yOffset); // 設置位置
                         this.Controls.Add(nameLabel); // 將商品名稱 Label 添加到主要頁面
 
                         // 顯示價格
                         Label priceLabel = new Label();
-                        priceLabel.Text = $"價格: {parts[1]}   /斤"; // 顯示價格
+                        priceLabel.Text = $"價格: {parts[1]}   /kg"; // 顯示價格
                         priceLabel.AutoSize = true; // 自動調整大小
                         priceLabel.Location = new System.Drawing.Point(200, yOffset); // 設置位置
                         this.Controls.Add(priceLabel); // 將價格 Label 添加到主要頁面
@@ -76,26 +95,66 @@ namespace MyFirstApp
                         TextBox quantityTextBox = new TextBox();
                         quantityTextBox.Location = new System.Drawing.Point(350, yOffset); // 設置位置
                         quantityTextBox.Size = new System.Drawing.Size(100, 30);
-                        quantityTextBox.Text = parts[2]; // 設置 TextBox 的文本為文件中的數量
+                        quantityTextBox.TextChanged += (s, e) => UpdateTotalPrice(); // 添加即時更新總價的事件
                         this.Controls.Add(quantityTextBox); // 將數量 TextBox 添加到主要頁面
 
                         yOffset += 30; // 更新 Y 軸偏移量，以便顯示下一組商品和價格
                     }
                 }
+                // 顯示總價 Label
+                Label totalPriceLabel = new Label();
+                totalPriceLabel.Name = "totalPriceLabel"; // 設置名稱以便於查找
+                totalPriceLabel.Text = "總價: 0 元"; // 初始總價
+                totalPriceLabel.AutoSize = true; // 自動調整大小
+                totalPriceLabel.Location = new System.Drawing.Point(50, yOffset); // 設置位置
+                this.Controls.Add(totalPriceLabel);
             }
         }
      
-
-        //---------頁面初始化---------------
-        [STAThread]
-        static void Main()
+// 更新總價的方法
+    private void UpdateTotalPrice()
+    {
+        double total = 0;
+        
+        // 遍歷所有的控件以計算總價
+        foreach (var control in this.Controls)
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            if (control is TextBox quantityTextBox)
+            {
+                // 確保對應的價格 Label 在前面
+                int index = this.Controls.IndexOf(quantityTextBox);
+                if (index > 0 && this.Controls[index - 1] is Label priceLabel)
+                {
+                    // 解析價格
+                    if (double.TryParse(priceLabel.Text.Replace("價格: ", "").Replace("   /kg", "").Trim(), out double price))
+                    {
+                        // 計算總價
+                        if (double.TryParse(quantityTextBox.Text, out double quantity))
+                        {
+                            total += price * quantity; // 累加總價
+                        }
+                    }
+                }
+            }
+        }
+
+        //更新總價 Label
+        var totalPriceLabel = this.Controls.OfType<Label>().FirstOrDefault(c => c.Name == "totalPriceLabel");
+        if (totalPriceLabel != null)
+        {
+            totalPriceLabel.Text = $"總價: {total} 元"; // 更新顯示的總價
         }
     }
-}
+            //---------頁面初始化---------------
+            [STAThread]
+            static void Main()
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new MainForm());
+            }
+        }
+    }
 
 //----------------設定彈窗--------------
 public partial class CustomDialog : Form
@@ -189,6 +248,7 @@ public partial class CustomDialog : Form
                 }
             }
             mainForm.DisplayCurrentNames();
+            this.Close();
         }
     
     private void LoadNamesFromFile()
