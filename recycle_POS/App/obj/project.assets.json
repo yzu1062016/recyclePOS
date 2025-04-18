@@ -8,19 +8,19 @@
     "net9.0-windows7.0": []
   },
   "packageFolders": {
-    "C:\\Users\\user\\.nuget\\packages\\": {}
+    "C:\\Users\\Grace\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\user\\Desktop\\recycle_POS\\App\\App.csproj",
+      "projectUniqueName": "C:\\Users\\Grace\\Desktop\\recycle_POS\\app\\App.csproj",
       "projectName": "App",
-      "projectPath": "C:\\Users\\user\\Desktop\\recycle_POS\\App\\App.csproj",
-      "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\user\\Desktop\\recycle_POS\\App\\obj\\",
+      "projectPath": "C:\\Users\\Grace\\Desktop\\recycle_POS\\app\\App.csproj",
+      "packagesPath": "C:\\Users\\Grace\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Grace\\Desktop\\recycle_POS\\app\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Grace\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0-windows"

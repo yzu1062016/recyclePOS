@@ -50,14 +50,14 @@ namespace MyFirstApp
             scrollPanel.Controls.Add(reset);
 
             //--------有設定按鈕-----------
-            Button print = new Button();
-            print.Text = "結果";
-            print.Location = new System.Drawing.Point(650, 50);
-            print.Size = new System.Drawing.Size(300, 70);
-            print.Font = new System.Drawing.Font(print.Font.FontFamily, 20);
-            print.Click += new EventHandler(Print_Click);
-            this.Controls.Add(print);
-            scrollPanel.Controls.Add(print);
+            Button result = new Button();
+            result.Text = "結果";
+            result.Location = new System.Drawing.Point(650, 50);
+            result.Size = new System.Drawing.Size(300, 70);
+            result.Font = new System.Drawing.Font(result.Font.FontFamily, 20);
+            result.Click += new EventHandler(Result_Click);
+            this.Controls.Add(result);
+            scrollPanel.Controls.Add(result);
 
             // 創建 PictureBox 控件
             PictureBox pictureBox = new PictureBox();
@@ -90,7 +90,7 @@ namespace MyFirstApp
         {
             DisplayCurrentNames();
         }
-        private void Print_Click(object? sender, EventArgs e)
+        private void Result_Click(object? sender, EventArgs e)
         {
             ShowResultDialog();
         }
@@ -110,6 +110,7 @@ namespace MyFirstApp
                 string[] names = File.ReadAllLines("name.txt");
                 // 新增註記用 TextBox
                 TextBox noteTextBox = new TextBox();
+                noteTextBox.Name = "noteTextBox";
                 noteTextBox.Location = new System.Drawing.Point(50, 130);
                 noteTextBox.Size = new System.Drawing.Size(500, 30);
                 scrollPanel.Controls.Add(noteTextBox);
@@ -238,9 +239,17 @@ namespace MyFirstApp
             // 假設這裡有一個獲取當前行的 nameLabel 和 resultLabel 的邏輯
             var nameLabels = scrollPanel.Controls.OfType<Label>().Where(p => p.Text.StartsWith("物品:")).ToList();
             var resultLabels = scrollPanel.Controls.OfType<Label>().Where(p => p.Text.StartsWith("=")).ToList();
-
+            var noteTextBox = scrollPanel.Controls.OfType<TextBox>().FirstOrDefault(l => l.Name == "noteTextBox");
+            
             using (StreamWriter writer = new StreamWriter("result.txt"))
-            {
+            { 
+                
+                // 寫入 noteTextBox 的內容
+                if (noteTextBox != null && !string.IsNullOrEmpty(noteTextBox.Text))
+                {
+                    writer.WriteLine($"註記: {noteTextBox.Text}"); 
+                }
+
                 for (int i = 0; i < nameLabels.Count; i++)
                 {
                     var nameLabel = nameLabels[i];
@@ -282,7 +291,7 @@ public partial class CustomDialog : Form
     public CustomDialog(MainForm form)
     {
         mainForm = form; // 保存引用'
-        this.Icon = new Icon("C:\\Users\\user\\Desktop\\recycle_POS\\App\\1acrr-f3cca-001.ico");
+        this.Icon = new Icon("ogjkf-nlbnm-001.ico");
         //---------彈窗資訊----------
         this.Text = "物品、價格設定";
         this.Size = new System.Drawing.Size(800, 700); // 設置對話框大小
@@ -322,7 +331,7 @@ public partial class CustomDialog : Form
 
     public CustomDialog()
     {
-        this.Icon = new Icon("C:\\Users\\user\\Desktop\\recycle_POS\\App\\1acrr-f3cca-001.ico");
+        this.Icon = new Icon("ogjkf-nlbnm-001.ico");
         this.Text = "result";
         this.Size = new System.Drawing.Size(500, 700); // 設置對話框大小
         float defaultFontSize = 20f; // 設定預設字體大小
@@ -398,17 +407,40 @@ public partial class CustomDialog : Form
         PrintDocument printDocument = new PrintDocument();
         printDocument.PrintPage += PrintDocument_PrintPage; // 註冊列印頁面事件
 
+        printDocument.DefaultPageSettings.PaperSize = new PaperSize("收據", 215, 378);
+
         PrintDialog printDialog = new PrintDialog();
         printDialog.Document = printDocument;
 
         if (printDialog.ShowDialog() == DialogResult.OK)
         {
-            // printDocument.Print(); // 開始列印
+            printDocument.Print(); // 開始列印
+            MessageBox.Show("Success", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            
         }
     }
     private void PrintDocument_PrintPage(object sender, PrintPageEventArgs e)
     {
+        if (e?.Graphics == null) return;
         
+        float yPos = 50; // 起始 Y 位置
+        float leftMargin = 50; // 左邊距
+        Font printFont = new Font("Arial", 12); // 設定字體
+
+        if (File.Exists("result.txt"))
+        {
+            string[] lines = File.ReadAllLines("result.txt");
+
+            // 繪製標題
+            e.Graphics.DrawString("仝興行", printFont, Brushes.Black, leftMargin, yPos);
+            yPos += printFont.GetHeight(e.Graphics) + 20;
+
+            foreach (string line in lines)
+            {
+                e.Graphics.DrawString(line, printFont, Brushes.Black, leftMargin, yPos);
+                yPos += printFont.GetHeight(e.Graphics) + 10; // 每行間距
+            }
+        }
     }
     
     private void LoadNamesFromFile()
@@ -491,6 +523,17 @@ public partial class CustomDialog : Form
                     totalPriceLabel.Location = new System.Drawing.Point(50, yOffset); // 設定位置
                     totalPriceLabel.Size = new System.Drawing.Size(200, 30); // 調整大小
                     scrollPanel.Controls.Add(totalPriceLabel); // 將總價 Label 添加到 scrollPanel
+                   
+                }
+                else if (parts.Length == 1 && parts[0].StartsWith("註記:")) // 檢查是否為總價行
+                {
+                    // 顯示註記資訊
+                    Label noteTextBox = new Label();
+                    noteTextBox.Text =parts[0].Trim(); // 設定總價文本，保留兩位小數
+                    noteTextBox.Location = new System.Drawing.Point(50, yOffset); // 設定位置
+                    noteTextBox.Size = new System.Drawing.Size(500, 30); // 調整大小
+                    scrollPanel.Controls.Add(noteTextBox); // 將總價 Label 添加到 scrollPanel
+                    yOffset += 40;
                    
                 }
             }
