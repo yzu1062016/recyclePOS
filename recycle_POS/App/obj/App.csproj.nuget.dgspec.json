@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Grace\\Desktop\\recycle_POS\\APP\\App.csproj": {}
+    "C:\\Users\\user\\Desktop\\recycle_POS\\App\\App.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Grace\\Desktop\\recycle_POS\\APP\\App.csproj": {
+    "C:\\Users\\user\\Desktop\\recycle_POS\\App\\App.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Grace\\Desktop\\recycle_POS\\APP\\App.csproj",
+        "projectUniqueName": "C:\\Users\\user\\Desktop\\recycle_POS\\App\\App.csproj",
         "projectName": "App",
-        "projectPath": "C:\\Users\\Grace\\Desktop\\recycle_POS\\APP\\App.csproj",
-        "packagesPath": "C:\\Users\\Grace\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Grace\\Desktop\\recycle_POS\\APP\\obj\\",
+        "projectPath": "C:\\Users\\user\\Desktop\\recycle_POS\\App\\App.csproj",
+        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\user\\Desktop\\recycle_POS\\App\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Grace\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0-windows"
@@ -43,6 +43,12 @@
       "frameworks": {
         "net9.0-windows7.0": {
           "targetAlias": "net9.0-windows",
+          "dependencies": {
+            "EPPlus": {
+              "target": "Package",
+              "version": "[8.0.2, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",

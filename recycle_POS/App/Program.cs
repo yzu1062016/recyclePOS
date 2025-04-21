@@ -3,6 +3,8 @@ using System.Windows.Forms;
 using System.IO;
 using MyFirstApp;
 using System.Drawing.Printing;
+using System.Drawing;
+using OfficeOpenXml;
 
 namespace MyFirstApp
 {
@@ -31,7 +33,7 @@ namespace MyFirstApp
 
             //--------有設定按鈕-----------
             Button setting = new Button();
-            setting.Text = "物品、價格設定";
+            setting.Text = "品項、價格設定";
             setting.Location = new System.Drawing.Point(50, 50);
             setting.Size = new System.Drawing.Size(300, 70);
             setting.Font = new System.Drawing.Font(setting.Font.FontFamily, 20);
@@ -123,7 +125,7 @@ namespace MyFirstApp
                     {
                         // 顯示商品名稱
                         Label nameLabel = new Label();
-                        nameLabel.Text = $"物品: {parts[0]}"; // 顯示商品名稱
+                        nameLabel.Text = $"品項: {parts[0]}"; // 顯示商品名稱
                         nameLabel.AutoSize = true; // 自動調整大小
                         nameLabel.Location = new System.Drawing.Point(50, yOffset); // 設置位置
                         this.Controls.Add(nameLabel); // 將商品名稱 Label 添加到主要頁面
@@ -237,25 +239,19 @@ namespace MyFirstApp
         private void ShowResultDialog()
         {
             // 假設這裡有一個獲取當前行的 nameLabel 和 resultLabel 的邏輯
-            var nameLabels = scrollPanel.Controls.OfType<Label>().Where(p => p.Text.StartsWith("物品:")).ToList();
+            var nameLabels = scrollPanel.Controls.OfType<Label>().Where(p => p.Text.StartsWith("品項:")).ToList();
             var resultLabels = scrollPanel.Controls.OfType<Label>().Where(p => p.Text.StartsWith("=")).ToList();
             var noteTextBox = scrollPanel.Controls.OfType<TextBox>().FirstOrDefault(l => l.Name == "noteTextBox");
             
             using (StreamWriter writer = new StreamWriter("result.txt"))
             { 
-                
-                // 寫入 noteTextBox 的內容
-                if (noteTextBox != null && !string.IsNullOrEmpty(noteTextBox.Text))
-                {
-                    writer.WriteLine($"註記: {noteTextBox.Text}"); 
-                }
 
                 for (int i = 0; i < nameLabels.Count; i++)
                 {
                     var nameLabel = nameLabels[i];
                     var resultLabel = resultLabels.ElementAtOrDefault(i); // 確保不會超出範圍
 
-                    if (resultLabel != null && resultLabel.Text != "=    0")
+                    if (resultLabel != null)
                     {
                         // 將 nameLabel 和 resultLabel 的內容寫入 result.txt
                         writer.WriteLine($"{nameLabel.Text}, {resultLabel.Text}");
@@ -267,6 +263,11 @@ namespace MyFirstApp
                 {
                     writer.WriteLine($"{totalPriceLabel.Text}"); // 寫入總價
                 }
+                // 寫入 noteTextBox 的內容
+                if (noteTextBox != null && !string.IsNullOrEmpty(noteTextBox.Text))
+                {
+                    writer.WriteLine($"註記: {noteTextBox.Text}"); 
+                }
             }
             CustomDialog dialog = new CustomDialog();
             dialog.ShowDialog();
@@ -275,6 +276,9 @@ namespace MyFirstApp
         [STAThread]
         static void Main()
         {
+            #pragma warning disable CS0618
+            ExcelPackage.License.SetNonCommercialPersonal("仝興行");
+            #pragma warning restore CS0618
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());
@@ -293,7 +297,7 @@ public partial class CustomDialog : Form
         mainForm = form; // 保存引用'
         this.Icon = new Icon("ogjkf-nlbnm-001.ico");
         //---------彈窗資訊----------
-        this.Text = "物品、價格設定";
+        this.Text = "品項、價格設定";
         this.Size = new System.Drawing.Size(800, 700); // 設置對話框大小
         float defaultFontSize = 20f; // 設定預設字體大小
         this.Font = new System.Drawing.Font(this.Font.FontFamily, defaultFontSize); // 設定窗體的字體
@@ -405,9 +409,8 @@ public partial class CustomDialog : Form
     private void Print_Click(object? sender, EventArgs e)
     {
         PrintDocument printDocument = new PrintDocument();
-        printDocument.PrintPage += PrintDocument_PrintPage; // 註冊列印頁面事件
 
-        printDocument.DefaultPageSettings.PaperSize = new PaperSize("收據", 215, 378);
+        printDocument.PrintPage += PrintDocument_PrintPage; // 註冊列印頁面事件
 
         PrintDialog printDialog = new PrintDialog();
         printDialog.Document = printDocument;
@@ -415,7 +418,7 @@ public partial class CustomDialog : Form
         if (printDialog.ShowDialog() == DialogResult.OK)
         {
             printDocument.Print(); // 開始列印
-            MessageBox.Show("Success", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show($"success");
             
         }
     }
@@ -437,10 +440,97 @@ public partial class CustomDialog : Form
 
             foreach (string line in lines)
             {
-                e.Graphics.DrawString(line, printFont, Brushes.Black, leftMargin, yPos);
-                yPos += printFont.GetHeight(e.Graphics) + 10; // 每行間距
+                if (!line.Contains("=    0")){
+                    string lineWithoutComma = line.Replace(",", "");
+                    e.Graphics.DrawString(lineWithoutComma, printFont, Brushes.Black, leftMargin, yPos);
+                    yPos += printFont.GetHeight(e.Graphics) + 10; // 每行間距
+                }
             }
         }
+    }
+
+    private void SaveExecl_Click(object? sender, EventArgs e)
+    {
+
+       // 獲取當天日期
+        string today = DateTime.Now.ToString("yyyy-MM-dd");
+        string fileName = $"Report_{today}.xlsx"; // 設定文件名
+        string filePath = Path.Combine(Environment.CurrentDirectory, fileName);
+
+        // 讀取 name.txt 和 result.txt 文件
+        string[] nameLines = File.ReadAllLines("name.txt"); // 假設 name.txt 在當前目錄中
+        string[] resultLines = File.ReadAllLines("result.txt"); // 假設 result.txt 在當前目錄中
+
+        // 讀取舊檔資料（若存在）
+        Dictionary<string, (double price, double number)> dataDict = new Dictionary<string, (double, double)>();
+        if (File.Exists(filePath))
+        {
+            using (var package = new ExcelPackage(new FileInfo(filePath)))
+            {
+                var worksheet = package.Workbook.Worksheets["報表"];
+                int row = 2;
+                while (!string.IsNullOrWhiteSpace(worksheet.Cells[row, 1].Text))
+                {
+                    string name = worksheet.Cells[row, 1].Text.Trim();
+                    double price = double.Parse(worksheet.Cells[row, 2].Text);
+                    double number = double.Parse(worksheet.Cells[row, 3].Text);
+
+                    dataDict[name] = (price, number);
+                    row++;
+                }
+            }
+        }
+        // 加入新的資料
+        for (int i = 0; i < nameLines.Length; i++)
+        {
+            var nameParts = nameLines[i].Trim().Split(',');
+            var resultParts = resultLines[i].Trim().Split('=');
+
+            string name = nameParts[0];
+            double price = double.Parse(nameParts[1]);
+            double number = double.Parse(resultParts[1]);
+
+            if (dataDict.ContainsKey(name))
+            {
+                var old = dataDict[name];
+                dataDict[name] = (price, old.number + number);
+            }
+            else
+            {
+                dataDict[name] = (price, number);
+            }
+        }
+
+        // 使用 EPPlus 創建 Excel 文件
+        using (ExcelPackage package = new ExcelPackage())
+        {
+
+            var worksheet = package.Workbook.Worksheets.Add("報表");
+
+            // 寫入數據
+            worksheet.Cells[1, 1].Value = "品項"; // 第一行第一列
+            worksheet.Cells[1, 2].Value = "價格"; // 第一行第二列
+            worksheet.Cells[1, 3].Value = "公斤數";
+
+            // 寫入數據
+            int row = 2;
+            foreach (var entry in dataDict)
+            {
+                worksheet.Cells[row, 1].Value = entry.Key;
+                worksheet.Cells[row, 2].Value = entry.Value.price;
+                worksheet.Cells[row, 3].Value = entry.Value.number;
+                worksheet.Cells[row, 4].Value = entry.Value.price * entry.Value.number;
+                row++;
+            }
+
+            // 保存文件
+            worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+
+            FileInfo fi = new FileInfo(filePath);
+            package.SaveAs(fi);
+        }
+
+        MessageBox.Show($"數據已保存到 {fileName}");
     }
     
     private void LoadNamesFromFile()
@@ -493,7 +583,7 @@ public partial class CustomDialog : Form
                 // 假設每行格式為 "name, result"
                 var parts = line.Split(',');
 
-                if (parts.Length == 2)
+                if (parts.Length == 2 && parts[1].Replace(" ", "") != "=0")
                 {
                     // 為每一行創建新的 nameLabel 和 resultLabel
                     Label nameLabel = new Label(); // 新建 nameLabel
@@ -523,6 +613,7 @@ public partial class CustomDialog : Form
                     totalPriceLabel.Location = new System.Drawing.Point(50, yOffset); // 設定位置
                     totalPriceLabel.Size = new System.Drawing.Size(200, 30); // 調整大小
                     scrollPanel.Controls.Add(totalPriceLabel); // 將總價 Label 添加到 scrollPanel
+                    yOffset += 40;
                    
                 }
                 else if (parts.Length == 1 && parts[0].StartsWith("註記:")) // 檢查是否為總價行
@@ -531,13 +622,13 @@ public partial class CustomDialog : Form
                     Label noteTextBox = new Label();
                     noteTextBox.Text =parts[0].Trim(); // 設定總價文本，保留兩位小數
                     noteTextBox.Location = new System.Drawing.Point(50, yOffset); // 設定位置
-                    noteTextBox.Size = new System.Drawing.Size(500, 30); // 調整大小
+                    noteTextBox.Size = new System.Drawing.Size(400, 30); // 調整大小
                     scrollPanel.Controls.Add(noteTextBox); // 將總價 Label 添加到 scrollPanel
                     yOffset += 40;
                    
                 }
             }
-            //-----------有儲存按鈕--------------
+            //-----------有列印按鈕--------------
             Button pinrt = new Button();
             pinrt.Text = "列印";
             pinrt.Location = new System.Drawing.Point(300, yOffset);
@@ -546,6 +637,16 @@ public partial class CustomDialog : Form
             pinrt.Click += new EventHandler(Print_Click);
             this.Controls.Add(pinrt);
             scrollPanel.Controls.Add(pinrt);
+
+            //-----------有儲存到報表按鈕--------------
+            Button save_execl = new Button();
+            save_execl.Text = "儲存到報表";
+            save_execl.Location = new System.Drawing.Point(300, yOffset+50);
+            save_execl.Size = new System.Drawing.Size(150, 40);
+            save_execl.Font = new System.Drawing.Font(pinrt.Font.FontFamily, 16);
+            save_execl.Click += new EventHandler(SaveExecl_Click);
+            this.Controls.Add(save_execl);
+            scrollPanel.Controls.Add(save_execl);
         }
     }
 }
