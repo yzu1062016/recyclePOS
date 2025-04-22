@@ -1,14 +1,14 @@
 # recyclePOS
 回收場POS機功能
 
-## 功能
+# 功能
 
 1. 編輯各品項名稱、價格
 2. 各品項公斤數計算
 3. 生產單一訂單收據
 4. 產生日報表
 
-### 使用
+## 使用
 1. 下載 .NET 9.0
 https://dotnet.microsoft.com/zh-tw/download/dotnet/9.0
 
@@ -37,3 +37,15 @@ https://dotnet.microsoft.com/zh-tw/download/dotnet/9.0
 7. 報表功能
 
 ![image](https://github.com/user-attachments/assets/58df4ca2-8f46-431a-a8ce-bc65b585afd7)
+
+## 其餘使用事項
+
+1. 程式可以多開始用，如下圖
+
+![image](https://github.com/user-attachments/assets/8facf60b-2666-41a2-af42-40c8edd50069)
+
+2. 多開始用時，若有更新品項、價格，各視窗須點擊重置以獲取最新設定
+
+3. 若同時使用多個此程式，一次只能一個單據點擊結果按鈕、列印、儲存到報表
+
+![image](https://github.com/user-attachments/assets/880449d2-6ce2-4b51-b0bc-94ab68837196)
