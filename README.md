@@ -48,4 +48,5 @@ https://dotnet.microsoft.com/zh-tw/download/dotnet/9.0
 
 3. 若同時使用多個此程式，一次只能一個單據點擊結果按鈕、列印、儲存到報表
 
-![image](https://github.com/user-attachments/assets/880449d2-6ce2-4b51-b0bc-94ab68837196)
+![image](https://github.com/user-attachments/assets/3d166c56-f5e7-464c-b444-93bc9632c092)
+
